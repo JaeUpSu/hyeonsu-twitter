@@ -1,0 +1,7 @@
+// ../../ 이런걸 clean 하게 하기 위한 절대 경로 사용하기
+{
+  "compilerOptions": {
+    "baseUrl": "src"
+  },
+  "include": ["src"]
+}
