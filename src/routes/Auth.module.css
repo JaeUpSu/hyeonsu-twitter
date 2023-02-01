@@ -3,6 +3,8 @@
   top: 200px;
   left: 200px;
   background-color: bisque;
+  width: 400px;
+  height: 400px;
 }
 
 .auth_box {
