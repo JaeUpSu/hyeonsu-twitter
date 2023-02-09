@@ -1,115 +1,116 @@
 import React, { useState } from "react";
-import styles from "./Auth.module.css";
-
 import {
   getAuth,
-  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
   signInWithPopup,
+  GoogleAuthProvider,
 } from "firebase/auth";
-import app from "fbase";
 
-function Auth() {
-  const [user, setUser] = useState({
-    email: "",
-    password: "",
-  });
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-  const [newAccount, setNewAccount] = useState(false);
-  const [userData, setUserData] = useState(null);
+import {
+  faGoogle,
+  faTwitter,
+  faFacebook,
+} from "@fortawesome/free-brands-svg-icons";
 
-  const onChangeUser = (e) => {
-    const { name, value } = e.target;
+const Auth = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [newAccount, setNewAccount] = useState(true);
+  const [error, setError] = useState("");
 
-    console.log(name + " " + value);
-    setUser({
-      ...user,
-      [name]: value,
-    });
+  const onChange = (event) => {
+    const {
+      target: { name, value },
+    } = event;
+    // const {name, value} = event.target
+
+    if (name === "email") {
+      setEmail(value);
+    } else if (name === "password") {
+      setPassword(value);
+    }
+  };
+
+  const onSubmit = async (event) => {
+    event.preventDefault(); // submit()은 클릭과 동시에 새로고침됨.
+
+    const auth = getAuth();
+
+    let data;
+    if (newAccount) {
+      data = await createUserWithEmailAndPassword(auth, email, password);
+    } else {
+      data = await signInWithEmailAndPassword(auth, email, password);
+    }
   };
 
   const toggleAccount = () => setNewAccount((prev) => !prev);
 
-  function handleGoogleLogin() {
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+  // https://firebase.google.com/docs/auth?hl=ko
+  const onSocialClick = async (event) => {
+    const {
+      target: { name },
+    } = event;
+    const auth = getAuth();
 
-    signInWithPopup(auth, provider)
-      .then((data) => {
-        setUserData(data.user);
-        console.log(data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-
-  const onSubmit = async (event) => {
-    event.preventDefault(); // submit 버튼 클릭 시 새로고침 방지
-    console.log(user.email + " " + user.password);
-
-    const auth = getAuth(app);
-    let auth_data;
-
-    if (newAccount) {
-      auth_data = await createUserWithEmailAndPassword(
-        auth,
-        user.email,
-        user.password
-      );
-      console.log("가입");
-    } else {
-      auth_data = await signInWithEmailAndPassword(
-        auth,
-        user.email,
-        user.password
-      );
-      console.log("로그인");
+    let provider;
+    if (name === "google") {
+      provider = new GoogleAuthProvider();
     }
 
-    console.log(auth_data);
+    const data = await signInWithPopup(auth, provider);
+    console.log(data);
   };
 
   return (
-    <div className={styles.auth_body}>
-      <form onSubmit={onSubmit}>
-        <div>
-          <input
-            name="email"
-            type="email"
-            placeholder="input email"
-            value={user.email}
-            onChange={onChangeUser}
-            required
-          ></input>
-        </div>
-        <div>
-          <input
-            name="password"
-            type="password"
-            placeholder="input password"
-            value={user.password}
-            onChange={onChangeUser}
-            required
-          ></input>
-        </div>
-        <div>
-          <input
-            type="submit"
-            value={newAccount ? "Create Account" : "Sign in"}
-          ></input>
-          <span onClick={toggleAccount}>
-            {newAccount ? " Sign in" : " Create Account"}
-          </span>
-          <br />
-          <br />
-          <button onClick={handleGoogleLogin}>Google Account</button>
-          {userData ? userData.displayName : null}
-        </div>
+    <div className="authContainer">
+      <FontAwesomeIcon
+        icon={faTwitter}
+        color={"#04AAFF"}
+        size="3x"
+        style={{ marginBottom: 30 }}
+      />
+      <form onSubmit={onSubmit} className="container">
+        <input
+          name="email"
+          type="email"
+          placeholder="Email"
+          required
+          value={email}
+          className="authInput"
+          onChange={onChange}
+        />
+        <input
+          name="password"
+          type="password"
+          placeholder="Password"
+          required
+          value={password}
+          className="authInput"
+          onChange={onChange}
+        />
+        <input
+          type="submit"
+          className="authInput authSubmit"
+          value={newAccount ? "Create Account" : "Sign In"}
+        />
+        {error}
       </form>
+      <span onClick={toggleAccount} className="authToggle">
+        {newAccount ? "Sign In" : "Create Account"}
+      </span>
+      <div className="authBtns">
+        <button className="authBtn" onClick={onSocialClick} name="google">
+          Continue with Google <FontAwesomeIcon icon={faGoogle} />
+        </button>
+        <button className="authBtn" onClick={onSocialClick} name="google">
+          Continue with Facebook <FontAwesomeIcon icon={faFacebook} />
+        </button>
+      </div>
     </div>
   );
-}
-
+};
 export default Auth;

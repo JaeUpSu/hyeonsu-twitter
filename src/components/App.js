@@ -1,41 +1,37 @@
-import { useEffect, useState } from "react";
-import { getAuth } from "firebase/auth";
-import app from "fbase";
-import AppRouter from "./Router";
+import React, { useState, useEffect } from "react";
+import AppRouter from "components/Router";
+import { auth } from "fbase";
 
 function App() {
   const [init, setInit] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userObj, seteUserObj] = useState(null);
+  const [userObj, setUserObj] = useState(null);
 
-  const initializeUser = () => {
-    const auth = getAuth(app);
+  useEffect(() => {
+    // https://firebase.google.com/docs/auth/web/manage-users?hl=ko
     auth.onAuthStateChanged((user) => {
-      console.log("user");
-      console.log(user);
-
       if (user) {
         setIsLoggedIn(true);
-        seteUserObj(user);
+        setUserObj(user);
       } else {
         setIsLoggedIn(false);
       }
       setInit(true);
     });
-  };
-
-  useEffect(() => {
-    initializeUser();
   }, []);
-
   return (
-    <div>
-      {init ? (
-        <AppRouter isLoggedIn={isLoggedIn} userObj={userObj} />
-      ) : (
-        "Initializing..." //로딩중
-      )}
-    </div>
+    <>
+      <div>
+        {init ? (
+          <AppRouter isLoggedIn={isLoggedIn} userObj={userObj} />
+        ) : (
+          "Initializing..."
+        )}
+        <footer className="footer_logo">
+          &copy; {new Date().getFullYear()} Twitter
+        </footer>
+      </div>
+    </>
   );
 }
 
